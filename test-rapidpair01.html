@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RapidPair Component — Test Harness</title>
+<style>
+  body { margin: 0; padding: 16px; font: 15px/1.5 system-ui, sans-serif; background: #f7f7f8; color: #222; }
+  h1 { margin: 0 0 4px; font-size: 20px; }
+  .subtitle { color: #666; font-size: .85rem; margin-bottom: 16px; }
+
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin: 12px auto; max-width: 600px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+
+  button { padding: 10px 20px; border-radius: 10px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 15px; margin: 4px; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.primary { background: #e3f2fd; border-color: #1976d2; color: #1976d2; font-weight: 600; }
+  button.danger  { background: #ffebee; border-color: #e57373; color: #c62828; font-weight: 600; }
+  button.success { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+
+  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .88rem; }
+  .status.ok   { background: #e8f5e9; color: #1b5e20; }
+  .status.warn { background: #fff8e1; color: #795548; }
+  .status.bad  { background: #ffebee; color: #b71c1c; }
+
+  #appUI { display: none; }
+  #appUI.active { display: block; }
+
+  .messages-box { margin-top: 16px; padding: 12px; background: #f0f0f0; border-radius: 8px; min-height: 80px; max-height: 300px; overflow-y: auto; }
+  .messages-box .msg { margin: 4px 0; padding: 4px 8px; border-radius: 6px; }
+  .messages-box .msg.sent { color: #2e7d32; background: #e8f5e9; }
+  .messages-box .msg.recv { color: #1565c0; background: #e3f2fd; }
+  .messages-box .msg.sys  { color: #666; font-style: italic; font-size: .88rem; }
+
+  .custom-msg { display: flex; gap: 8px; margin-top: 12px; }
+  .custom-msg input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+
+  #eventLog { font-size: .82rem; max-height: 180px; overflow: auto; white-space: pre-wrap; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; display: none; font-family: monospace; }
+  #eventLog.visible { display: block; }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: #e8f5e9; border: 1.5px solid #4caf50; border-radius: 20px; padding: 3px 12px; font-size: .9rem; font-weight: 600; color: #2e7d32; }
+  .badge.warn { background: #fff8e1; border-color: #f57c00; color: #e65100; }
+
+  .info-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+</style>
+
+<!-- RapidPair dependencies -->
+<script src="qrcode.js"></script>
+<script src="pako.min.js"></script>
+<script src="html5-qrcode.min.js"></script>
+
+<!-- The component -->
+<script src="rapidpair.js"></script>
+</head>
+<body>
+
+<h1>RapidPair Component Test</h1>
+<p class="subtitle">Testing the <code>&lt;rapid-pair&gt;</code> web component with <code>send()</code> / <code>on()</code> API</p>
+
+<!-- The component — just one line -->
+<rapid-pair id="pair"
+  controller-label="Controller"
+  responder-label="Responder"
+  auto-close="true">
+</rapid-pair>
+
+<!-- App UI — shown after secure pairing -->
+<div id="appUI">
+  <div class="card">
+    <h2>Connected! <span id="statusBadge" class="badge">🔒 Secure</span></h2>
+    <div class="info-row">
+      <span>Role: <strong id="roleDisplay">—</strong></span>
+      <span>Verify code: <code id="codeDisplay">—</code></span>
+    </div>
+
+    <div style="margin-top: 16px; text-align: center;">
+      <button class="primary" onclick="sendMsg('beep')">Send BEEP</button>
+      <button class="primary" onclick="sendMsg('chirp')">Send CHIRP</button>
+      <button class="primary" onclick="sendMsg('ping')">Send PING</button>
+    </div>
+
+    <div class="custom-msg">
+      <input id="customType" placeholder="Type (e.g. hello)" value="chat"/>
+      <input id="customPayload" placeholder='Payload (e.g. {"text":"hi"})' value='{"text":"Hello from the other side!"}'/>
+      <button onclick="sendCustom()">Send</button>
+    </div>
+
+    <div class="messages-box" id="messagesBox">
+      <div class="msg sys">Waiting for messages…</div>
+    </div>
+
+    <div style="margin-top: 16px; text-align: center;">
+      <button class="danger" onclick="pair.disconnect()">Disconnect</button>
+      <button onclick="pair.open()">Re-open Pairing UI</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>API Status</h2>
+    <p>pair.getRole() → <code id="apiRole">—</code></p>
+    <p>pair.isSecure() → <code id="apiSecure">—</code></p>
+    <button onclick="refreshApiStatus()" style="font-size:13px;padding:6px 14px;">Refresh</button>
+  </div>
+</div>
+
+<!-- Disconnected banner -->
+<div id="disconnectBanner" class="card" style="display:none; text-align:center; border-color:#f57c00;">
+  <h2 style="color:#e65100;">⚠️ Connection Lost</h2>
+  <p>The peer disconnected. The component will auto-reopen the pairing modal.</p>
+  <button class="primary" onclick="pair.open()">Open Pairing UI</button>
+</div>
+
+<!-- Event log -->
+<div class="card" style="max-width:600px; margin:12px auto;">
+  <h3 id="logToggle" style="cursor:pointer;color:#666;font-size:14px;user-select:none">▶ Event Log (click to toggle)</h3>
+  <div id="eventLog"></div>
+</div>
+
+<script>
+  const pair = document.getElementById('pair');
+  const messagesBox = document.getElementById('messagesBox');
+  let messageCount = 0;
+
+  // ---- Helper: log events to the event log panel ----
+  function logEvent(text) {
+    const el = document.getElementById('eventLog');
+    const ts = new Date().toLocaleTimeString();
+    el.textContent += `[${ts}] ${text}\n`;
+    el.scrollTop = el.scrollHeight;
+    console.log('[TestApp]', text);
+  }
+
+  // ---- Helper: add message to the messages box ----
+  function addMsg(html, cls) {
+    if (messageCount === 0) messagesBox.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    div.innerHTML = html;
+    messagesBox.appendChild(div);
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+    messageCount++;
+  }
+
+  // ---- EVENT: secure ----
+  pair.addEventListener('secure', (e) => {
+    const { role, verifyCode } = e.detail;
+    logEvent(`🔒 SECURE — role: ${role}, verifyCode: ${verifyCode}`);
+
+    document.getElementById('appUI').classList.add('active');
+    document.getElementById('disconnectBanner').style.display = 'none';
+    document.getElementById('roleDisplay').textContent = role;
+    document.getElementById('codeDisplay').textContent = verifyCode;
+
+    addMsg(`Securely paired as <strong>${role}</strong> (code: ${verifyCode})`, 'sys');
+    refreshApiStatus();
+  });
+
+  // ---- EVENT: disconnected ----
+  pair.addEventListener('disconnected', () => {
+    logEvent('❌ DISCONNECTED');
+    document.getElementById('disconnectBanner').style.display = 'block';
+    document.getElementById('statusBadge').className = 'badge warn';
+    document.getElementById('statusBadge').textContent = '⚠️ Disconnected';
+    addMsg('Connection lost.', 'sys');
+    refreshApiStatus();
+  });
+
+  // ---- EVENT: reconnected ----
+  pair.addEventListener('reconnected', (e) => {
+    logEvent(`🔄 RECONNECTED — role: ${e.detail.role}`);
+    addMsg('Reconnected!', 'sys');
+  });
+
+  // ---- EVENT: error ----
+  pair.addEventListener('error', (e) => {
+    logEvent(`⚠️ ERROR — ${e.detail.error?.message || e.detail.error}`);
+  });
+
+  // ---- Listen for incoming messages (all types) ----
+  // Register listeners for the built-in test types
+  ['beep', 'chirp', 'ping'].forEach(type => {
+    pair.on(type, (payload) => {
+      logEvent(`RX [${type}]: ${JSON.stringify(payload)}`);
+      addMsg(`← 🔒 <strong>${type.toUpperCase()}</strong> ${payload.ts ? '(ts: ' + new Date(payload.ts).toLocaleTimeString() + ')' : ''}`, 'recv');
+    });
+  });
+
+  // Listen for custom 'chat' messages
+  pair.on('chat', (payload) => {
+    logEvent(`RX [chat]: ${JSON.stringify(payload)}`);
+    addMsg(`← 🔒 <strong>chat:</strong> ${payload.text || JSON.stringify(payload)}`, 'recv');
+  });
+
+  // Catch-all: listen for any message type we might not have registered
+  // (The component routes to registered listeners; for unknown types, we add a generic handler below)
+
+  // ---- Send functions ----
+  function sendMsg(type) {
+    const payload = { ts: Date.now() };
+    pair.send(type, payload);
+    logEvent(`TX [${type}]: ${JSON.stringify(payload)}`);
+    addMsg(`→ 🔒 <strong>${type.toUpperCase()}</strong>`, 'sent');
+  }
+
+  function sendCustom() {
+    const type = document.getElementById('customType').value.trim() || 'custom';
+    let payload;
+    try {
+      payload = JSON.parse(document.getElementById('customPayload').value);
+    } catch (_) {
+      payload = { text: document.getElementById('customPayload').value };
+    }
+    pair.send(type, payload);
+    logEvent(`TX [${type}]: ${JSON.stringify(payload)}`);
+    addMsg(`→ 🔒 <strong>${type}:</strong> ${JSON.stringify(payload)}`, 'sent');
+  }
+
+  // Allow Enter key to send custom messages
+  document.getElementById('customPayload').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendCustom();
+  });
+
+  // ---- API status refresh ----
+  function refreshApiStatus() {
+    document.getElementById('apiRole').textContent = JSON.stringify(pair.getRole());
+    document.getElementById('apiSecure').textContent = JSON.stringify(pair.isSecure());
+  }
+
+  // ---- Event log toggle ----
+  document.getElementById('logToggle').onclick = () => {
+    const el = document.getElementById('eventLog');
+    el.classList.toggle('visible');
+    document.getElementById('logToggle').textContent =
+      el.classList.contains('visible') ? '▼ Event Log (click to toggle)' : '▶ Event Log (click to toggle)';
+  };
+
+  logEvent('Test harness loaded. Pairing modal should be open.');
+</script>
+
+</body>
+</html>
