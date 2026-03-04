@@ -374,15 +374,17 @@
       this._isGeneratingLanQR = false;
       this._snapshotUnsub = null;
       this._hadPreviousConnection = false;
-
-      this._render();
-      this._attachListeners();
-
-      // Pre-fetch TURN credentials
-      this._turnPromise = this._getCloudflareTURN().then(s => { this._cachedTURN = s; }).catch(() => {});
+      this._initialized = false;
     }
 
     connectedCallback() {
+      if (!this._initialized) {
+        this._initialized = true;
+        this._render();
+        this._attachListeners();
+        // Pre-fetch TURN credentials
+        this._turnPromise = this._getCloudflareTURN().then(s => { this._cachedTURN = s; }).catch(() => {});
+      }
       // Auto-open the modal on mount
       this._showModal();
     }
@@ -1509,7 +1511,22 @@
   /* ================================================================
    *  REGISTER & PAGE LIFECYCLE
    * ================================================================ */
-  customElements.define('rapid-pair', RapidPair);
+
+  // Defer registration so that if the script loads in <head>, existing
+  // <rapid-pair> elements in the body are *upgraded* rather than
+  // constructed mid-parse. The upgrade path doesn't throw
+  // "The result must not have attributes".
+  function register() {
+    if (!customElements.get('rapid-pair')) {
+      customElements.define('rapid-pair', RapidPair);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', register);
+  } else {
+    register();
+  }
 
   // Clean up on page unload
   window.addEventListener('beforeunload', () => {
