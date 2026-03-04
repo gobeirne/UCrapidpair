@@ -30,11 +30,9 @@
    *  STYLES — injected into Shadow DOM
    * ================================================================ */
   const COMPONENT_CSS = `
-    :host { display: block; }
+    rapid-pair { display: block; }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    #modal {
+    .rp-modal {
       display: flex;
       position: fixed;
       top: 0; left: 0;
@@ -48,7 +46,7 @@
       color: #222;
     }
 
-    #container {
+    .rp-container {
       background: #fff;
       border-radius: 16px;
       padding: 24px;
@@ -61,12 +59,12 @@
       position: relative;
     }
 
-    h2 { font-size: 17px; margin-bottom: 12px; }
+    .rp-modal h2 { font-size: 17px; margin-bottom: 12px; }
 
-    .step { display: none; }
-    .step.active { display: block; }
+    .rp-step { display: none; }
+    .rp-step.rp-active { display: block; }
 
-    button {
+    .rp-modal button {
       padding: 10px 20px;
       border-radius: 10px;
       border: 1px solid #ccc;
@@ -76,17 +74,17 @@
       margin: 4px;
       font-family: inherit;
     }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-    button.primary {
-      background: var(--rp-primary, #1976d2);
-      border-color: var(--rp-primary, #1976d2);
-      color: #fff;
+    .rp-modal button:disabled { opacity: .55; cursor: not-allowed; }
+    .rp-primary {
+      background: var(--rp-primary, #1976d2) !important;
+      border-color: var(--rp-primary, #1976d2) !important;
+      color: #fff !important;
       font-weight: 600;
     }
-    button.success { background: #e8f5e9; border-color: #4caf50; }
-    button.warning { background: #fff8e1; border-color: #f57c00; color: #e65100; }
+    .rp-modal button.rp-success { background: #e8f5e9; border-color: #4caf50; }
+    .rp-warning { background: #fff8e1 !important; border-color: #f57c00 !important; color: #e65100 !important; }
 
-    input {
+    .rp-modal input {
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -95,7 +93,7 @@
       width: 100%;
       box-sizing: border-box;
     }
-    textarea {
+    .rp-textarea {
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -106,90 +104,90 @@
       height: 72px;
     }
 
-    .hint { font-size: .88rem; color: #666; margin: 8px 0; }
-    .instruction { font-size: 1.05rem; font-weight: 600; margin: 10px 0; color: #333; }
-    .mono {
+    .rp-hint { font-size: .88rem; color: #666; margin: 8px 0; }
+    .rp-instruction { font-size: 1.05rem; font-weight: 600; margin: 10px 0; color: #333; }
+    .rp-mono {
       font-family: monospace; letter-spacing: 2px; font-size: 28px;
       font-weight: 700; text-align: center; padding: 18px;
       background: #f0f0f0; border-radius: 8px; margin: 14px 0;
     }
 
-    .status-indicator {
+    .rp-status-indicator {
       background: #f0f7ff; border: 1px solid #90caf9; border-radius: 8px;
       padding: 10px 14px; margin: 12px 0; font-size: 14px;
       text-align: center; color: #1565c0; font-weight: 500; display: none;
     }
-    .status-indicator.active { display: block; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-    .status-indicator.loading { animation: pulse 1.5s ease-in-out infinite; }
-    .status-indicator.success { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
-    .status-indicator.error   { background: #ffebee; border-color: #e57373; color: #c62828; }
+    .rp-status-indicator.rp-active { display: block; }
+    @keyframes rp-pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .rp-status-indicator.rp-loading { animation: rp-pulse 1.5s ease-in-out infinite; display: block; }
+    .rp-status-indicator.rp-success { background: #e8f5e9; border-color: #81c784; color: #2e7d32; display: block; }
+    .rp-status-indicator.rp-error   { background: #ffebee; border-color: #e57373; color: #c62828; display: block; }
 
-    .verify-bar {
+    .rp-verify-bar {
       background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 10px;
       padding: 14px 16px; margin: 10px 0; text-align: center;
     }
-    .verify-bar .verify-code {
+    .rp-verify-code {
       font-size: 2.4rem; font-weight: 800; letter-spacing: 6px;
       font-family: monospace; margin: 6px 0; color: #1b5e20;
     }
-    .verify-bar .verify-label { font-size: .85rem; color: #558b2f; font-weight: 600; }
-    .verify-bar .verify-hint  { font-size: .8rem; color: #666; margin-top: 6px; line-height: 1.4; }
-    .verify-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
-    .verify-buttons button { padding: 14px 28px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; }
-    .btn-match    { background: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; }
-    .btn-match:hover { background: #c8e6c9; }
-    .btn-no-match { background: #ffebee; border: 2px solid #e57373; color: #c62828; }
-    .btn-no-match:hover { background: #ffcdd2; }
+    .rp-verify-label { font-size: .85rem; color: #558b2f; font-weight: 600; }
+    .rp-verify-hint  { font-size: .8rem; color: #666; margin-top: 6px; line-height: 1.4; }
+    .rp-verify-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .rp-verify-buttons button { padding: 14px 28px; border-radius: 10px; font-size: 16px; font-weight: 600; min-height: 48px; }
+    .rp-btn-match    { background: #e8f5e9 !important; border: 2px solid #4caf50 !important; color: #2e7d32 !important; }
+    .rp-btn-match:hover { background: #c8e6c9 !important; }
+    .rp-btn-no-match { background: #ffebee !important; border: 2px solid #e57373 !important; color: #c62828 !important; }
+    .rp-btn-no-match:hover { background: #ffcdd2 !important; }
 
-    .verify-mismatch {
+    .rp-verify-mismatch {
       background: #ffebee; border: 2px solid #e57373; border-radius: 10px;
       padding: 16px; margin: 10px 0; text-align: center; display: none;
     }
-    .verify-mismatch .warn-icon { font-size: 2rem; }
-    .verify-mismatch .warn-text { font-size: 1rem; font-weight: 600; color: #c62828; margin: 8px 0; }
-    .verify-mismatch .warn-detail { font-size: .85rem; color: #666; }
+    .rp-warn-icon { font-size: 2rem; }
+    .rp-warn-text { font-size: 1rem; font-weight: 600; color: #c62828; margin: 8px 0; }
+    .rp-warn-detail { font-size: .85rem; color: #666; }
 
-    .secure-badge {
+    .rp-secure-badge {
       display: inline-flex; align-items: center; gap: 6px;
       background: #e8f5e9; border: 1.5px solid #4caf50; border-radius: 20px;
       padding: 4px 14px; font-size: .92rem; font-weight: 600; color: #2e7d32;
     }
-    .encryption-info { font-size: .78rem; color: #666; margin: 8px 0; }
-    .encryption-info code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: .73rem; }
+    .rp-encryption-info { font-size: .78rem; color: #666; margin: 8px 0; }
+    .rp-encryption-info code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: .73rem; }
 
-    .qr-wrap { text-align: center; margin: 14px auto; cursor: pointer; background: #fff; padding: 16px; border-radius: 8px; }
-    .qr-wrap svg { display: block; margin: 0 auto; background: #fff; padding: 8px; max-width: 100%; height: auto; }
-    .qr-nav { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
-    .qr-nav label { display: inline-flex; align-items: center; gap: 4px; font-size: .9rem; }
+    .rp-qr-wrap { text-align: center; margin: 14px auto; cursor: pointer; background: #fff; padding: 16px; border-radius: 8px; }
+    .rp-qr-wrap svg { display: block; margin: 0 auto; background: #fff; padding: 8px; max-width: 100%; height: auto; }
+    .rp-qr-nav { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+    .rp-qr-nav label { display: inline-flex; align-items: center; gap: 4px; font-size: .9rem; }
 
-    .qr-section { display: none; margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px; }
-    .qr-section h3 { margin: 0 0 10px; font-size: 14px; color: #666; }
+    .rp-qr-section { display: none; margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px; }
+    .rp-qr-section h3 { margin: 0 0 10px; font-size: 14px; color: #666; }
 
-    .reader-box { width: 100%; max-width: 360px; margin: 10px auto; }
+    .rp-reader-box { width: 100%; max-width: 360px; margin: 10px auto; }
 
-    .qr-overlay {
+    .rp-qr-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.9); z-index: 11000;
       align-items: center; justify-content: center; flex-direction: column;
     }
-    .qr-overlay.active { display: flex; }
-    .qr-overlay-content { max-width: 90vw; max-height: 90vh; text-align: center; }
-    .qr-overlay svg { max-width: 90vmin; max-height: 90vmin; }
-    .qr-overlay-close {
+    .rp-qr-overlay.rp-active { display: flex; }
+    .rp-qr-overlay-content { max-width: 90vw; max-height: 90vh; text-align: center; }
+    .rp-qr-overlay svg { max-width: 90vmin; max-height: 90vmin; }
+    .rp-qr-overlay-close {
       position: absolute; top: 16px; right: 16px;
       background: #fff; border: none; border-radius: 50%;
       width: 36px; height: 36px; font-size: 22px; cursor: pointer;
     }
 
-    .close-btn {
+    .rp-close-btn {
       position: absolute; top: 12px; right: 16px; background: none;
       border: none; font-size: 22px; cursor: pointer; color: #999; padding: 4px 8px;
     }
-    .close-btn:hover { color: #333; }
+    .rp-close-btn:hover { color: #333; }
 
-    details { margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px; }
-    details summary { cursor: pointer; font-weight: 600; color: #666; font-size: .95rem; }
+    .rp-modal details { margin-top: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px; }
+    .rp-modal details summary { cursor: pointer; font-weight: 600; color: #666; font-size: .95rem; }
   `;
 
   /* ================================================================
@@ -347,7 +345,9 @@
     /* ---------- lifecycle ---------- */
     constructor() {
       super();
-      this.attachShadow({ mode: 'open' });
+
+      // Use a unique prefix for all IDs to avoid collisions in light DOM
+      this._uid = 'rp-' + Math.random().toString(36).slice(2, 8);
 
       // State
       this._role = null;
@@ -453,170 +453,184 @@
      *  RENDERING
      * ================================================================ */
     _render() {
-      this.shadowRoot.innerHTML = `
-        <style>${COMPONENT_CSS}</style>
+      // Inject scoped styles into document head (once)
+      if (!document.getElementById('rapidpair-styles')) {
+        const styleEl = document.createElement('style');
+        styleEl.id = 'rapidpair-styles';
+        styleEl.textContent = COMPONENT_CSS;
+        document.head.appendChild(styleEl);
+      }
 
-        <div id="modal">
-          <div id="container">
-            <button class="close-btn" id="closeBtn">&times;</button>
+      // Render into light DOM (this = the <rapid-pair> element)
+      this.innerHTML = `
+        <div id="${this._uid}-modal" class="rp-modal">
+          <div id="${this._uid}-container" class="rp-container">
+            <button class="rp-close-btn" id="${this._uid}-closeBtn">&times;</button>
 
             <!-- Step 1 — Role selection -->
-            <div id="step1" class="step active">
+            <div id="${this._uid}-step1" class="rp-step rp-active">
               <h2>Select device role</h2>
               <div style="text-align:center;margin:16px 0">
-                <button id="btnController" class="primary">${this._controllerLabel}</button>
-                <button id="btnResponder" class="primary">${this._responderLabel}</button>
+                <button id="${this._uid}-btnController" class="rp-primary">${this._controllerLabel}</button>
+                <button id="${this._uid}-btnResponder" class="rp-primary">${this._responderLabel}</button>
               </div>
             </div>
 
             <!-- Step 2 — Controller -->
-            <div id="step2controller" class="step">
+            <div id="${this._uid}-step2controller" class="rp-step">
               <h2>${this._controllerLabel}: Share Connection Code</h2>
-              <div id="controllerStatus" class="status-indicator"></div>
-              <div id="controllerCodeSection">
-                <p class="instruction">Share this code with the ${this._responderLabel}:</p>
-                <div id="controllerCode" class="mono">----</div>
+              <div id="${this._uid}-controllerStatus" class="rp-status-indicator"></div>
+              <div id="${this._uid}-controllerCodeSection">
+                <p class="rp-instruction">Share this code with the ${this._responderLabel}:</p>
+                <div id="${this._uid}-controllerCode" class="rp-mono">----</div>
                 <div style="text-align:center">
-                  <button id="btnCopyCode">Copy Code</button>
+                  <button id="${this._uid}-btnCopyCode">Copy Code</button>
                 </div>
                 <p style="text-align:center;margin-top:10px">
-                  <a href="#" id="btnLanQR" style="display:none;color:#999;font-size:.9rem;text-decoration:none">No internet? Try LAN QR Code →</a>
+                  <a href="#" id="${this._uid}-btnLanQR" style="display:none;color:#999;font-size:.9rem;text-decoration:none">No internet? Try LAN QR Code →</a>
                 </p>
               </div>
-              <div class="qr-section" id="qrSection">
+              <div class="rp-qr-section" id="${this._uid}-qrSection">
                 <h3>LAN QR Code (Same WiFi Only)</h3>
-                <div id="qrDisplayArea">
-                  <div class="qr-wrap" id="qrWrap"></div>
-                  <div id="qrNav" class="qr-nav" style="display:none">
-                    <button id="qrPrev">◀ Prev</button>
-                    <span id="qrIndex"></span>
-                    <button id="qrNext">Next ▶</button>
-                    <label><input type="checkbox" id="autoAdvance" checked><span>Auto (1.5s)</span></label>
+                <div id="${this._uid}-qrDisplayArea">
+                  <div class="rp-qr-wrap" id="${this._uid}-qrWrap"></div>
+                  <div id="${this._uid}-qrNav" class="rp-qr-nav" style="display:none">
+                    <button id="${this._uid}-qrPrev">◀ Prev</button>
+                    <span id="${this._uid}-qrIndex"></span>
+                    <button id="${this._uid}-qrNext">Next ▶</button>
+                    <label><input type="checkbox" id="${this._uid}-autoAdvance" checked><span>Auto (1.5s)</span></label>
                   </div>
                   <div style="text-align:center;margin-top:10px">
-                    <button id="btnCopyQRText">Copy QR Text</button>
-                    <button id="qrTrouble" style="display:none">Trouble scanning?</button>
+                    <button id="${this._uid}-btnCopyQRText">Copy QR Text</button>
+                    <button id="${this._uid}-qrTrouble" style="display:none">Trouble scanning?</button>
                   </div>
-                  <p class="hint">Scan with ${this._responderLabel}'s camera. Both devices must be on the same WiFi.</p>
+                  <p class="rp-hint">Scan with ${this._responderLabel}'s camera. Both devices must be on the same WiFi.</p>
                 </div>
                 <div style="margin-top:14px">
-                  <button id="btnShowCodeAndQR" style="display:none;margin-bottom:8px">▼ Show my code and QR</button>
-                  <button id="scanStartController">Start Camera to Scan Reply</button>
-                  <button id="scanStopController" disabled>Stop Camera</button>
-                  <div id="qrProgressController" style="font-weight:600;color:#666;margin:8px 0;min-height:18px"></div>
-                  <div class="reader-box" id="readerController"></div>
-                  <p class="hint" style="margin-top:10px">Or paste the reply QR text:</p>
-                  <textarea id="qrPasteController" placeholder="Paste here..."></textarea>
+                  <button id="${this._uid}-btnShowCodeAndQR" style="display:none;margin-bottom:8px">▼ Show my code and QR</button>
+                  <button id="${this._uid}-scanStartController">Start Camera to Scan Reply</button>
+                  <button id="${this._uid}-scanStopController" disabled>Stop Camera</button>
+                  <div id="${this._uid}-qrProgressController" style="font-weight:600;color:#666;margin:8px 0;min-height:18px"></div>
+                  <div class="rp-reader-box" id="${this._uid}-readerController"></div>
+                  <p class="rp-hint" style="margin-top:10px">Or paste the reply QR text:</p>
+                  <textarea id="${this._uid}-qrPasteController" class="rp-textarea" placeholder="Paste here..."></textarea>
                   <div style="text-align:center;margin-top:6px">
-                    <button id="qrApplyController">Apply Pasted Text</button>
+                    <button id="${this._uid}-qrApplyController">Apply Pasted Text</button>
                   </div>
                 </div>
-                <button id="btnHideQR" style="margin-top:10px">Hide QR Code</button>
+                <button id="${this._uid}-btnHideQR" style="margin-top:10px">Hide QR Code</button>
               </div>
             </div>
 
             <!-- Step 2 — Responder -->
-            <div id="step2responder" class="step">
+            <div id="${this._uid}-step2responder" class="rp-step">
               <h2>${this._responderLabel}: Enter Connection Code</h2>
-              <div id="responderStatus" class="status-indicator"></div>
-              <div id="responderCodeSection">
-                <p class="instruction">Enter the code from ${this._controllerLabel}:</p>
-                <input id="responderCodeInput" class="mono" placeholder="####" inputmode="numeric"
+              <div id="${this._uid}-responderStatus" class="rp-status-indicator"></div>
+              <div id="${this._uid}-responderCodeSection">
+                <p class="rp-instruction">Enter the code from ${this._controllerLabel}:</p>
+                <input id="${this._uid}-responderCodeInput" class="rp-mono" placeholder="####" inputmode="numeric"
                   style="text-align:center;font-size:24px;letter-spacing:4px;max-width:280px;margin:12px auto;display:block"/>
                 <div style="text-align:center;margin-top:12px">
-                  <button id="btnResponderConnect" class="primary">Connect</button>
+                  <button id="${this._uid}-btnResponderConnect" class="rp-primary">Connect</button>
                 </div>
               </div>
               <details style="margin-top:16px;padding:12px;background:#f9f9f9;border-radius:8px">
                 <summary style="cursor:pointer;font-weight:600;color:#666">Alternative: Scan QR Code Instead</summary>
                 <div style="text-align:center;margin:12px 0">
-                  <button id="btnShowCodeEntry" style="display:none;margin-bottom:8px">▼ Show code entry</button>
-                  <button id="scanStartResponder">Start Camera</button>
-                  <button id="scanStopResponder" disabled>Stop Camera</button>
+                  <button id="${this._uid}-btnShowCodeEntry" style="display:none;margin-bottom:8px">▼ Show code entry</button>
+                  <button id="${this._uid}-scanStartResponder">Start Camera</button>
+                  <button id="${this._uid}-scanStopResponder" disabled>Stop Camera</button>
                 </div>
-                <div id="qrProgressResponder" style="font-weight:600;color:#666;margin:8px 0;min-height:18px"></div>
-                <div class="reader-box" id="readerResponder"></div>
-                <p class="hint" style="margin-top:10px">Or paste the QR text:</p>
-                <textarea id="qrPasteResponder" placeholder="Paste here..."></textarea>
+                <div id="${this._uid}-qrProgressResponder" style="font-weight:600;color:#666;margin:8px 0;min-height:18px"></div>
+                <div class="rp-reader-box" id="${this._uid}-readerResponder"></div>
+                <p class="rp-hint" style="margin-top:10px">Or paste the QR text:</p>
+                <textarea id="${this._uid}-qrPasteResponder" class="rp-textarea" placeholder="Paste here..."></textarea>
                 <div style="text-align:center;margin-top:6px">
-                  <button id="qrApplyResponder">Apply Pasted Text</button>
+                  <button id="${this._uid}-qrApplyResponder">Apply Pasted Text</button>
                 </div>
               </details>
             </div>
 
             <!-- Step 4 — Responder reply QR -->
-            <div id="step4responderReply" class="step">
-              <p class="instruction">Show this QR to the ${this._controllerLabel}:</p>
-              <div class="qr-wrap" id="qrWrapResponderReply"></div>
-              <div id="qrNavResponder" class="qr-nav" style="display:none">
-                <button id="qrPrevResponder">◀ Prev</button>
-                <span id="qrIndexResponder"></span>
-                <button id="qrNextResponder">Next ▶</button>
-                <label><input type="checkbox" id="autoAdvanceResponder" checked><span>Auto (3s)</span></label>
+            <div id="${this._uid}-step4responderReply" class="rp-step">
+              <p class="rp-instruction">Show this QR to the ${this._controllerLabel}:</p>
+              <div class="rp-qr-wrap" id="${this._uid}-qrWrapResponderReply"></div>
+              <div id="${this._uid}-qrNavResponder" class="rp-qr-nav" style="display:none">
+                <button id="${this._uid}-qrPrevResponder">◀ Prev</button>
+                <span id="${this._uid}-qrIndexResponder"></span>
+                <button id="${this._uid}-qrNextResponder">Next ▶</button>
+                <label><input type="checkbox" id="${this._uid}-autoAdvanceResponder" checked><span>Auto (3s)</span></label>
               </div>
               <div style="text-align:center;margin-top:10px">
-                <button id="btnCopyQRTextResponder">Copy QR Text</button>
-                <button id="qrTroubleResponder" style="display:none">Trouble scanning?</button>
+                <button id="${this._uid}-btnCopyQRTextResponder">Copy QR Text</button>
+                <button id="${this._uid}-qrTroubleResponder" style="display:none">Trouble scanning?</button>
               </div>
-              <p class="hint">Waiting for ${this._controllerLabel} to scan…</p>
+              <p class="rp-hint">Waiting for ${this._controllerLabel} to scan…</p>
             </div>
 
-            <!-- Verification step (shown after WebRTC connects) -->
-            <div id="stepVerify" class="step">
+            <!-- Verification step -->
+            <div id="${this._uid}-stepVerify" class="rp-step">
               <div style="text-align:center;margin-bottom:10px">
-                <span class="secure-badge"><span style="font-size:1.1rem">🔒</span> Encrypted Connection</span>
+                <span class="rp-secure-badge"><span style="font-size:1.1rem">🔒</span> Encrypted Connection</span>
               </div>
-              <div class="verify-bar" id="verifyBar">
-                <div class="verify-label">Security Code</div>
-                <div class="verify-code" id="verifyCode"></div>
-                <div class="verify-hint">Does the other device show the same code?</div>
-                <div class="verify-buttons">
-                  <button class="btn-match" id="btnVerifyMatch">Yes, codes match</button>
-                  <button class="btn-no-match" id="btnVerifyNoMatch">No, different</button>
+              <div class="rp-verify-bar" id="${this._uid}-verifyBar">
+                <div class="rp-verify-label">Security Code</div>
+                <div class="rp-verify-code" id="${this._uid}-verifyCode"></div>
+                <div class="rp-verify-hint">Does the other device show the same code?</div>
+                <div class="rp-verify-buttons">
+                  <button class="rp-btn-match" id="${this._uid}-btnVerifyMatch">Yes, codes match</button>
+                  <button class="rp-btn-no-match" id="${this._uid}-btnVerifyNoMatch">No, different</button>
                 </div>
               </div>
-              <p class="encryption-info">End-to-end encrypted · <code>AES-256-GCM</code> + <code>ECDH P-256</code> · DTLS transport</p>
+              <p class="rp-encryption-info">End-to-end encrypted · <code>AES-256-GCM</code> + <code>ECDH P-256</code> · DTLS transport</p>
 
-              <div id="verifyMismatch" class="verify-mismatch">
-                <div class="warn-icon">⛔</div>
-                <div class="warn-text">Connection may not be secure</div>
-                <div class="warn-detail">The codes don't match — this session may have been intercepted.<br>Please disconnect and try again.</div>
-                <div style="margin-top:12px"><button id="btnDisconnectMismatch" class="warning">Disconnect</button></div>
+              <div id="${this._uid}-verifyMismatch" class="rp-verify-mismatch">
+                <div class="rp-warn-icon">⛔</div>
+                <div class="rp-warn-text">Connection may not be secure</div>
+                <div class="rp-warn-detail">The codes don't match — this session may have been intercepted.<br>Please disconnect and try again.</div>
+                <div style="margin-top:12px"><button id="${this._uid}-btnDisconnectMismatch" class="rp-warning">Disconnect</button></div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Fullscreen QR overlay -->
-        <div class="qr-overlay" id="qrOverlay">
-          <button class="qr-overlay-close" id="qrOverlayClose">×</button>
-          <div class="qr-overlay-content" id="qrOverlayContent"></div>
+        <div class="rp-qr-overlay" id="${this._uid}-qrOverlay">
+          <button class="rp-qr-overlay-close" id="${this._uid}-qrOverlayClose">×</button>
+          <div class="rp-qr-overlay-content" id="${this._uid}-qrOverlayContent"></div>
         </div>
       `;
-
-      this.shadowRoot.host.style.setProperty('--rp-primary', this._primaryColor);
     }
 
-    /* ---------- internal helpers for shadow DOM queries ---------- */
-    _$(sel) { return this.shadowRoot.querySelector(sel); }
-    _$$(sel) { return this.shadowRoot.querySelectorAll(sel); }
+    /* ---------- internal helpers for light DOM queries ---------- */
+    _$(sel) {
+      // Translate bare #id selectors to UID-prefixed ones
+      if (sel.startsWith('#')) {
+        return document.getElementById(this._uid + '-' + sel.slice(1));
+      }
+      return this.querySelector(sel);
+    }
+    _$$(sel) {
+      // For class-based selectors, scope to this element
+      return this.querySelectorAll(sel);
+    }
 
     _showModal() { const m = this._$('#modal'); if (m) m.style.display = 'flex'; }
     _hideModal() { const m = this._$('#modal'); if (m) m.style.display = 'none'; }
 
     _showStep(id) {
-      this._$$('.step').forEach(s => s.classList.remove('active'));
-      const el = this._$(`#${id}`);
-      if (el) el.classList.add('active');
+      this.querySelectorAll('.rp-step').forEach(s => s.classList.remove('rp-active'));
+      const el = document.getElementById(this._uid + '-' + id);
+      if (el) el.classList.add('rp-active');
     }
 
     _showStatus(sel, html, type = 'loading') {
       const el = this._$(sel);
       if (!el) return;
-      el.className = `status-indicator active ${type}`;
+      el.className = `rp-status-indicator rp-${type}`;
       el.innerHTML = html;
     }
-    _hideStatus(sel) { const el = this._$(sel); if (el) el.className = 'status-indicator'; }
+    _hideStatus(sel) { const el = this._$(sel); if (el) el.className = 'rp-status-indicator'; }
 
     _log(...a) { console.log('[RapidPair]', ...a); }
 
@@ -646,8 +660,8 @@
         try {
           await navigator.clipboard.writeText($('#controllerCode').textContent);
           $('#btnCopyCode').textContent = 'Copied!';
-          $('#btnCopyCode').classList.add('success');
-          setTimeout(() => { $('#btnCopyCode').textContent = 'Copy Code'; $('#btnCopyCode').classList.remove('success'); }, 2000);
+          $('#btnCopyCode').classList.add('rp-success');
+          setTimeout(() => { $('#btnCopyCode').textContent = 'Copy Code'; $('#btnCopyCode').classList.remove('rp-success'); }, 2000);
         } catch (_) {}
       };
 
@@ -670,10 +684,10 @@
       $('#qrTroubleResponder').onclick = () => { if (!this._qrPackedResponder) return; clearTimeout(this._autoTimerResponder); this._qrChunksResponder = this._makeChunks(this._qrPackedResponder, true); this._qrIdxResponder = 0; this._showChunkQRResponder(); };
 
       // QR enlarge overlay
-      $('#qrWrap').onclick = () => { $('#qrOverlayContent').innerHTML = $('#qrWrap').innerHTML; $('#qrOverlay').classList.add('active'); };
-      $('#qrWrapResponderReply').onclick = () => { $('#qrOverlayContent').innerHTML = $('#qrWrapResponderReply').innerHTML; $('#qrOverlay').classList.add('active'); };
-      $('#qrOverlayClose').onclick = () => $('#qrOverlay').classList.remove('active');
-      $('#qrOverlay').onclick = (e) => { if (e.target === $('#qrOverlay')) $('#qrOverlay').classList.remove('active'); };
+      $('#qrWrap').onclick = () => { $('#qrOverlayContent').innerHTML = $('#qrWrap').innerHTML; $('#qrOverlay').classList.add('rp-active'); };
+      $('#qrWrapResponderReply').onclick = () => { $('#qrOverlayContent').innerHTML = $('#qrWrapResponderReply').innerHTML; $('#qrOverlay').classList.add('rp-active'); };
+      $('#qrOverlayClose').onclick = () => $('#qrOverlay').classList.remove('rp-active');
+      $('#qrOverlay').onclick = (e) => { if (e.target === $('#qrOverlay')) $('#qrOverlay').classList.remove('rp-active'); };
 
       // Controller scanner
       $('#scanStartController').onclick = () => this._startScanner(true);
@@ -711,9 +725,9 @@
       $('#qrApplyResponder').onclick = () => { const t = $('#qrPasteResponder').value.trim(); if (t) { this._absorb(t, false); $('#qrPasteResponder').value = ''; } };
 
       // Verification
-      $('#btnVerifyMatch').onclick    = () => this._onVerifyMatch();
-      $('#btnVerifyNoMatch').onclick  = () => this._onVerifyNoMatch();
-      $('#btnDisconnectMismatch').onclick = () => this._onDisconnectMismatch();
+      $('#btnVerifyMatch').addEventListener('click', () => this._onVerifyMatch());
+      $('#btnVerifyNoMatch').addEventListener('click', () => this._onVerifyNoMatch());
+      $('#btnDisconnectMismatch').addEventListener('click', () => this._onDisconnectMismatch());
 
       // Allow Enter key on responder code input
       $('#responderCodeInput').onkeydown = (e) => { if (e.key === 'Enter') this._responderConnect(); };
@@ -724,8 +738,8 @@
       try {
         await navigator.clipboard.writeText(text);
         const btn = this._$(btnSel);
-        btn.textContent = 'Copied!'; btn.classList.add('success');
-        setTimeout(() => { btn.textContent = defaultLabel; btn.classList.remove('success'); }, 2000);
+        btn.textContent = 'Copied!'; btn.classList.add('rp-success');
+        setTimeout(() => { btn.textContent = defaultLabel; btn.classList.remove('rp-success'); }, 2000);
       } catch (_) {}
     }
 
@@ -1427,41 +1441,9 @@
       }
 
       try {
-        // Html5Qrcode expects an element ID reachable via document.getElementById.
-        // Shadow DOM elements aren't accessible that way, so we temporarily promote
-        // the reader container into the light DOM, give it a unique ID, create the
-        // scanner, then move it back once scanning stops.
-        const readerEl = this._$(isController ? '#readerController' : '#readerResponder');
-        const uniqueId = `rp-reader-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-        readerEl.id = uniqueId;
-
-        // Create a light-DOM wrapper and move the reader element there
-        if (!this._lightWrapper) {
-          this._lightWrapper = document.createElement('div');
-          this._lightWrapper.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;z-index:-1;';
-          document.body.appendChild(this._lightWrapper);
-        }
-        // Actually: a simpler approach — use the element reference directly.
-        // Html5Qrcode v2.3+ supports passing a DOM element.
-        // But if only v2.2 is available, we need the ID approach.
-        // Let's try the element-first approach and fall back.
-
-        let scannerInstance;
-        try {
-          // Try passing element directly (v2.3+)
-          scannerInstance = new Html5Qrcode(readerEl);
-        } catch (_) {
-          // Fall back to string ID; temporarily attach to light DOM
-          const placeholder = document.createComment('rp-scanner-placeholder');
-          readerEl.parentNode.insertBefore(placeholder, readerEl);
-          document.body.appendChild(readerEl);
-          readerEl.id = uniqueId;
-          scannerInstance = new Html5Qrcode(uniqueId);
-          // Store info for cleanup
-          scannerInstance._rpPlaceholder = placeholder;
-          scannerInstance._rpReaderEl = readerEl;
-          scannerInstance._rpOrigId = isController ? 'readerController' : 'readerResponder';
-        }
+        // Light DOM: elements are accessible via document.getElementById
+        const readerId = this._uid + '-' + (isController ? 'readerController' : 'readerResponder');
+        const scannerInstance = new Html5Qrcode(readerId);
 
         scannerInstance.start(
           { facingMode: 'environment' },
@@ -1482,15 +1464,6 @@
     async _stopScanner(scanner, startBtn, stopBtn) {
       if (!scanner) return null;
       try { await scanner.stop(); scanner.clear(); } catch (_) {}
-      // If we moved the reader element to light DOM, move it back
-      if (scanner._rpPlaceholder && scanner._rpReaderEl) {
-        const placeholder = scanner._rpPlaceholder;
-        const readerEl = scanner._rpReaderEl;
-        readerEl.id = scanner._rpOrigId;
-        readerEl.innerHTML = '';
-        placeholder.parentNode.insertBefore(readerEl, placeholder);
-        placeholder.remove();
-      }
       const sb = this._$(startBtn);
       const stb = this._$(stopBtn);
       if (sb) sb.disabled = false;
