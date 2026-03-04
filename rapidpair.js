@@ -461,8 +461,8 @@
         document.head.appendChild(styleEl);
       }
 
-      // Render into light DOM (this = the <rapid-pair> element)
-      this.innerHTML = `
+      // Build the modal HTML
+      const html = `
         <div id="${this._uid}-modal" class="rp-modal">
           <div id="${this._uid}-container" class="rp-container">
             <button class="rp-close-btn" id="${this._uid}-closeBtn">&times;</button>
@@ -600,6 +600,13 @@
           <div class="rp-qr-overlay-content" id="${this._uid}-qrOverlayContent"></div>
         </div>
       `;
+
+      // CRITICAL: Append modal directly to document.body, not inside the
+      // <rapid-pair> element. On mobile browsers, position:fixed elements
+      // inside non-body parents have broken touch/click event handling.
+      this._modalWrapper = document.createElement('div');
+      this._modalWrapper.innerHTML = html;
+      document.body.appendChild(this._modalWrapper);
     }
 
     /* ---------- internal helpers for light DOM queries ---------- */
@@ -619,7 +626,9 @@
     _hideModal() { const m = this._$('#modal'); if (m) m.style.display = 'none'; }
 
     _showStep(id) {
-      this.querySelectorAll('.rp-step').forEach(s => s.classList.remove('rp-active'));
+      // Steps live inside the body-appended modal wrapper
+      const root = this._modalWrapper || document;
+      root.querySelectorAll('.rp-step').forEach(s => s.classList.remove('rp-active'));
       const el = document.getElementById(this._uid + '-' + id);
       if (el) el.classList.add('rp-active');
     }
@@ -1068,6 +1077,10 @@
       if (this._snapshotUnsub) { try { this._snapshotUnsub(); } catch (_) {} }
       try { if (this._dc) this._dc.close(); } catch (_) {}
       try { if (this._pc) this._pc.close(); } catch (_) {}
+      // Remove modal from body
+      if (this._modalWrapper && this._modalWrapper.parentNode) {
+        this._modalWrapper.parentNode.removeChild(this._modalWrapper);
+      }
     }
 
     /* ================================================================
