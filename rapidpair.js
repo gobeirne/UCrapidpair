@@ -622,8 +622,8 @@
       return this.querySelectorAll(sel);
     }
 
-    _showModal() { const m = this._$('#modal'); if (m) m.style.display = 'flex'; }
-    _hideModal() { const m = this._$('#modal'); if (m) m.style.display = 'none'; }
+    _showModal() { if (this._modalWrapper) this._modalWrapper.style.display = 'block'; const m = this._$('#modal'); if (m) m.style.display = 'flex'; }
+    _hideModal() { const m = this._$('#modal'); if (m) m.style.display = 'none'; if (this._modalWrapper) this._modalWrapper.style.display = 'none'; }
 
     _showStep(id) {
       // Steps live inside the body-appended modal wrapper
