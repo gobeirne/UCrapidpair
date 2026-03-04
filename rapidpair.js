@@ -56,6 +56,7 @@
       width: 92%;
       max-height: 92vh;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       position: relative;
     }
@@ -134,8 +135,8 @@
     }
     .verify-bar .verify-label { font-size: .85rem; color: #558b2f; font-weight: 600; }
     .verify-bar .verify-hint  { font-size: .8rem; color: #666; margin-top: 6px; line-height: 1.4; }
-    .verify-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
-    .verify-buttons button { padding: 10px 24px; border-radius: 10px; font-size: 15px; font-weight: 600; }
+    .verify-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .verify-buttons button { padding: 14px 28px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; }
     .btn-match    { background: #e8f5e9; border: 2px solid #4caf50; color: #2e7d32; }
     .btn-match:hover { background: #c8e6c9; }
     .btn-no-match { background: #ffebee; border: 2px solid #e57373; color: #c62828; }
@@ -923,10 +924,15 @@
           this._secureChan.encrypt(json).then(enc => {
             this._dc.send(enc);
             this._resetInactivityTimer();
-          });
+          }).catch(err => this._log('Encrypt/send error:', err.message));
         } else if (this._secureChan) {
+          this._log('Queuing message (not yet verified)');
           this._secureChan._pendingOutbound.push(json);
+        } else {
+          this._log('Cannot send: no secure channel');
         }
+      } else {
+        this._log('Cannot send: DataChannel not open, state:', this._dc?.readyState);
       }
     }
 
@@ -968,31 +974,37 @@
     }
 
     _onVerifyMatch() {
-      if (!this._secureChan) return;
+      if (!this._secureChan) { this._log('Verify match clicked but no secure channel!'); return; }
       this._secureChan.verified = true;
       this._log('User confirmed: codes match');
 
       // Flush pending verify messages
+      const pvCount = this._secureChan._pendingVerify.length;
       for (const pt of this._secureChan._pendingVerify) {
         this._routeMessage(pt);
       }
       this._secureChan._pendingVerify = [];
+      if (pvCount) this._log('Flushed', pvCount, 'pending inbound messages');
 
       // Flush pending outbound
+      const poCount = this._secureChan._pendingOutbound.length;
       for (const json of this._secureChan._pendingOutbound) {
         this._secureChan.encrypt(json).then(enc => {
           this._dc.send(enc);
         });
       }
       this._secureChan._pendingOutbound = [];
+      if (poCount) this._log('Flushed', poCount, 'pending outbound messages');
 
       // Dispatch the 'secure' event
+      this._log('Dispatching secure event, role:', this._role);
       this.dispatchEvent(new CustomEvent('secure', {
         detail: { role: this._role, verifyCode: this._secureChan.verifyCode }
       }));
 
       // Auto-close modal
       if (this._autoClose) {
+        this._log('Auto-closing modal');
         this._hideModal();
       }
     }
