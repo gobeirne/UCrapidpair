@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RapidPair Component Test</title>
+<style>
+  body { margin: 0; padding: 12px; font: 15px/1.4 system-ui; background: #f7f7f8; color: #222; }
+  h1 { margin: 0 0 12px; font-size: 18px; }
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 10px auto; max-width: 600px; }
+  button { padding: 10px 20px; border-radius: 10px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; font-size: 15px; margin: 4px; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  button.primary { background: #e3f2fd; border-color: #1976d2; color: #1976d2; font-weight: 600; }
+  button.danger  { background: #ffebee; border-color: #e57373; color: #c62828; font-weight: 600; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .9rem; }
+  .ok   { background: #e8f5e9; color: #1b5e20; }
+  .bad  { background: #ffebee; color: #b71c1c; }
+  .work-area { display: none; text-align: center; padding: 16px; }
+  .work-area.active { display: block; }
+  .work-area button { margin: 4px; padding: 12px 20px; font-size: 15px; }
+  .secure-badge { display: inline-flex; align-items: center; gap: 6px; background: #e8f5e9; border: 1.5px solid #4caf50; border-radius: 20px; padding: 4px 14px; font-size: .95rem; font-weight: 600; color: #2e7d32; }
+  .verify-bar { background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 10px; padding: 14px 16px; margin: 10px 0; text-align: center; }
+  .verify-bar .verify-code { font-size: 2.4rem; font-weight: 800; letter-spacing: 6px; font-family: monospace; margin: 6px 0; color: #1b5e20; }
+  .verify-bar .verify-label { font-size: .85rem; color: #558b2f; font-weight: 600; }
+  .encryption-info { font-size: .8rem; color: #666; margin: 8px 0; }
+  .encryption-info code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: .75rem; }
+  .reconnect-banner { background: #fff8e1; border: 2px solid #f57c00; border-radius: 8px; padding: 12px; text-align: center; font-weight: 600; margin: 12px auto; max-width: 600px; display: none; }
+  .custom-row { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+  .custom-row input { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+  .custom-row input:first-child { width: 80px; flex-shrink: 0; }
+  .custom-row input:nth-child(2) { flex: 1; min-width: 0; }
+  .custom-row button { flex-shrink: 0; padding: 10px 16px; font-size: 14px; }
+  #logSection { margin-top: 30px; padding: 16px; background: #fafafa; border-top: 2px solid #ddd; max-width: 640px; margin-left: auto; margin-right: auto; }
+  #logSection h3 { margin: 0 0 8px; font-size: 14px; color: #666; cursor: pointer; user-select: none; }
+  #log { font-size: .78rem; max-height: 200px; overflow: auto; white-space: pre-wrap; background: #fff; border: 1px solid #ddd; padding: 8px; border-radius: 4px; display: none; font-family: monospace; }
+  #log.visible { display: block; }
+</style>
+</head>
+<body>
+
+<h1>RapidPair Component Test <span style="color:#666;font-size:.8rem">v1.0 🔒</span></h1>
+
+<rapid-pair id="pair"
+  controller-label="Controller"
+  responder-label="Responder"
+  auto-close="true">
+</rapid-pair>
+
+<div class="reconnect-banner" id="reconnectBanner">
+  Connection lost. <button id="btnReconnect" style="margin-left:8px">Reconnect</button>
+</div>
+
+<div class="card work-area" id="workArea">
+  <h2>Connected! <span id="connStatus" class="status ok">Peer: connected</span></h2>
+  <div style="margin:10px 0">
+    <span class="secure-badge"><span style="font-size:1.1rem">🔒</span> Securely Connected</span>
+  </div>
+  <div class="verify-bar">
+    <div class="verify-label">Security Code</div>
+    <div class="verify-code" id="verifyCodeDisplay">—</div>
+    <div style="font-size:.85rem;color:#666;margin-top:4px">Role: <strong id="roleDisplay">—</strong></div>
+  </div>
+  <p class="encryption-info">
+    End-to-end encrypted · <code>AES-256-GCM</code> + <code>ECDH P-256</code> · DTLS transport
+  </p>
+  <div style="margin-top:20px">
+    <button id="btnBeep" class="primary">Send BEEP</button>
+    <button id="btnChirp" class="primary">Send CHIRP</button>
+    <button id="btnPing" class="primary">Send PING</button>
+  </div>
+  <div class="custom-row">
+    <input id="customType" placeholder="type" value="chat"/>
+    <input id="customPayload" placeholder='{"text":"Hello!"}' value='{"text":"Hello!"}'/>
+    <button id="btnSendCustom">Send</button>
+  </div>
+  <div style="margin-top:16px;padding:12px;background:#f0f0f0;border-radius:8px;min-height:60px;text-align:left">
+    <strong>Messages:</strong>
+    <div id="messages"></div>
+  </div>
+  <div style="margin-top:16px">
+    <button id="btnDisconnect" class="danger">Disconnect</button>
+    <button id="btnReopenPair">Re-open Pairing</button>
+  </div>
+  <div style="margin-top:12px;padding:8px;background:#f9f9f9;border-radius:8px;font-size:.82rem;color:#666;text-align:left">
+    <strong>API:</strong>
+    getRole() → <code id="apiRole">null</code> ·
+    isSecure() → <code id="apiSecure">false</code>
+    <button onclick="refreshStatus()" style="font-size:11px;padding:3px 8px;margin-left:6px">Refresh</button>
+  </div>
+</div>
+
+<div id="logSection">
+  <h3 id="logToggle">▶ Event Log (click to toggle)</h3>
+  <div id="log"></div>
+</div>
+
+<script src="pako.min.js"></script>
+<script src="qrcode.js"></script>
+<script src="html5-qrcode.min.js"></script>
+<script src="rapidpair.js?v=6"></script>
+
+<script>
+const pair = document.getElementById('pair');
+const logEl = document.getElementById('log');
+
+function log(...args) {
+  const ts = new Date().toLocaleTimeString();
+  console.log('[TestApp ' + ts + ']', ...args);
+  logEl.textContent += '[' + ts + '] ' + args.join(' ') + '\n';
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+document.getElementById('logToggle').onclick = () => {
+  logEl.classList.toggle('visible');
+  document.getElementById('logToggle').textContent =
+    logEl.classList.contains('visible') ? '▼ Event Log' : '▶ Event Log (click to toggle)';
+};
+
+function addMsg(text, direction) {
+  const div = document.createElement('div');
+  div.style.margin = '4px 0';
+  if (direction === 'sent') { div.textContent = '→ 🔒 ' + text; div.style.color = '#2e7d32'; }
+  else if (direction === 'recv') { div.textContent = '← 🔒 ' + text; div.style.color = '#1976d2'; }
+  else { div.textContent = text; div.style.color = '#666'; div.style.fontStyle = 'italic'; }
+  document.getElementById('messages').appendChild(div);
+}
+
+function refreshStatus() {
+  document.getElementById('apiRole').textContent = JSON.stringify(pair.getRole());
+  document.getElementById('apiSecure').textContent = JSON.stringify(pair.isSecure());
+}
+
+pair.addEventListener('secure', (e) => {
+  const { role, verifyCode } = e.detail;
+  log('🔒 SECURE — role:', role, 'verifyCode:', verifyCode);
+  document.getElementById('workArea').classList.add('active');
+  document.getElementById('reconnectBanner').style.display = 'none';
+  document.getElementById('roleDisplay').textContent = role;
+  document.getElementById('verifyCodeDisplay').textContent = verifyCode;
+  document.getElementById('connStatus').textContent = 'Peer: connected';
+  document.getElementById('connStatus').className = 'status ok';
+  refreshStatus();
+});
+
+pair.addEventListener('disconnected', () => {
+  log('❌ DISCONNECTED');
+  if (document.getElementById('workArea').classList.contains('active')) {
+    document.getElementById('reconnectBanner').style.display = 'block';
+  }
+  document.getElementById('connStatus').textContent = 'Peer: disconnected';
+  document.getElementById('connStatus').className = 'status bad';
+  refreshStatus();
+});
+
+pair.addEventListener('reconnected', (e) => { log('🔄 RECONNECTED — role:', e.detail.role); addMsg('Reconnected!', 'sys'); });
+pair.addEventListener('error', (e) => { log('⚠️ ERROR —', e.detail.error?.message || e.detail.error); });
+
+pair.on('beep',  () => { log('RX beep');  addMsg('BEEP', 'recv'); });
+pair.on('chirp', () => { log('RX chirp'); addMsg('CHIRP', 'recv'); });
+pair.on('ping', (p) => { log('RX ping'); addMsg('PING', 'recv'); pair.send('pong', { replyTo: p.ts, ts: Date.now() }); addMsg('PONG (auto-reply)', 'sent'); });
+pair.on('pong', (p) => { const rtt = p.replyTo ? (Date.now() - p.replyTo) : '?'; log('RX pong RTT=' + rtt + 'ms'); addMsg('PONG (RTT: ' + rtt + 'ms)', 'recv'); });
+pair.on('chat', (p) => { log('RX chat:', p.text || JSON.stringify(p)); addMsg('chat: ' + (p.text || JSON.stringify(p)), 'recv'); });
+
+document.getElementById('btnBeep').onclick  = () => { pair.send('beep',  { ts: Date.now() }); addMsg('BEEP', 'sent');  log('TX beep'); };
+document.getElementById('btnChirp').onclick = () => { pair.send('chirp', { ts: Date.now() }); addMsg('CHIRP', 'sent'); log('TX chirp'); };
+document.getElementById('btnPing').onclick  = () => { pair.send('ping',  { ts: Date.now() }); addMsg('PING', 'sent');  log('TX ping'); };
+document.getElementById('btnSendCustom').onclick = () => {
+  const type = document.getElementById('customType').value.trim() || 'custom';
+  let payload;
+  try { payload = JSON.parse(document.getElementById('customPayload').value); } catch (_) { payload = { text: document.getElementById('customPayload').value }; }
+  pair.send(type, payload); addMsg(type + ': ' + JSON.stringify(payload), 'sent'); log('TX ' + type);
+};
+document.getElementById('customPayload').onkeydown = (e) => { if (e.key === 'Enter') document.getElementById('btnSendCustom').click(); };
+document.getElementById('btnDisconnect').onclick = () => pair.disconnect();
+document.getElementById('btnReopenPair').onclick = () => pair.open();
+document.getElementById('btnReconnect').onclick = () => { document.getElementById('reconnectBanner').style.display = 'none'; pair.open(); };
+
+log('Test harness loaded. Pairing modal should be open.');
+</script>
+
+</body>
+</html>
