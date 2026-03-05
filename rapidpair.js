@@ -1510,20 +1510,11 @@
    *  REGISTER & PAGE LIFECYCLE
    * ================================================================ */
 
-  // Defer registration so that if the script loads in <head>, existing
-  // <rapid-pair> elements in the body are *upgraded* rather than
-  // constructed mid-parse. The upgrade path doesn't throw
-  // "The result must not have attributes".
-  function register() {
-    if (!customElements.get('rapid-pair')) {
-      customElements.define('rapid-pair', RapidPair);
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', register);
-  } else {
-    register();
+  // Register immediately. When the script is loaded after the <rapid-pair>
+  // element (recommended), this triggers an upgrade of the existing element.
+  // The upgrade path does NOT throw "must not have attributes".
+  if (!customElements.get('rapid-pair')) {
+    customElements.define('rapid-pair', RapidPair);
   }
 
   // Clean up on page unload
